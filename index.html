@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weatherworld</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            outline: none;
+            border-radius: 50px;
+            padding: 0 20px;
+            color: #fff;
+            font-size: 16px;
+            margin-right: 15px;
+        }
+        
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .search-box button {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.3);
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .search-box button:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .weather-info {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .city-name {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .date {
+            font-size: 16px;
+            margin-bottom: 25px;
+            opacity: 0.8;
+        }
+        
+        .temperature {
+            font-size: 80px;
+            font-weight: 700;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .temperature::after {
+            content: "°C";
+            position: absolute;
+            top: 15px;
+            font-size: 30px;
+        }
+        
+        .weather-condition {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        
+        .weather-condition img {
+            width: 50px;
+            margin-right: 10px;
+        }
+        
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .detail {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .detail i {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .detail-title {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .detail-value {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        
+        .credit {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .loader .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            display: none;
+            text-align: center;
+            color: #ff6b6b;
+            margin: 20px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        
+        .weather-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-box">
+            <input type="text" placeholder="Enter city name..." id="city-input">
+            <button id="search-btn"><i class="fas fa-search"></i></button>
+        </div>
+        
+        <div class="loader">
+            <div class="spinner"></div>
+        </div>
+        
+        <div class="error-message" id="error-message">
+            City not found. Please try again.
+        </div>
+        
+        <div class="weather-info" id="weather-info">
+            <h1 class="city-name">London</h1>
+            <p class="date">Monday, January 1, 2023</p>
+            
+            <div class="weather-icon">
+                <i class="fas fa-sun" style="font-size: 100px; color: #FFD700;"></i>
+            </div>
+            
+            <div class="temperature">20</div>
+            
+            <div class="weather-condition">
+                <span>Sunny</span>
+            </div>
+            
+            <div class="weather-details">
+                <div class="detail">
+                    <i class="fas fa-wind"></i>
+                    <span class="detail-title">Wind Speed</span>
+                    <span class="detail-value">5 km/h</span>
+                </div>
+                <div class="detail">
+                    <i class="fas fa-tint"></i>
+                    <span class="detail-title">Humidity</span>
+                    <span class="detail-value">65%</span>
+                </div>
+                <div class="detail">
+                    <i class="fas fa-compress-alt"></i>
+                    <span class="detail-title">Pressure</span>
+                    <span class="detail-value">1015 hPa</span>
+                </div>
+                <div class="detail">
+                    <i class="fas fa-eye"></i>
+                    <span class="detail-title">Visibility</span>
+                    <span class="detail-value">10 km</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="credit">
+            Design by Shivamkmr684@gmail.com
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cityInput = document.getElementById('city-input');
+            const searchBtn = document.getElementById('search-btn');
+            const weatherInfo = document.getElementById('weather-info');
+            const loader = document.querySelector('.loader');
+            const errorMessage = document.getElementById('error-message');
+            
+            // Default city
+            let currentCity = 'London';
+            
+            // Format date
+            function formatDate(date) {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                return date.toLocaleDateString('en-US', options);
+            }
+            
+            // Get weather icon class based on condition code
+            function getWeatherIcon(conditionCode) {
+                const iconMap = {
+                    '1000': 'fas fa-sun',           // Sunny
+                    '1003': 'fas fa-cloud-sun',     // Partly cloudy
+                    '1006': 'fas fa-cloud',         // Cloudy
+                    '1009': 'fas fa-cloud',         // Overcast
+                    '1030': 'fas fa-smog',          // Mist
+                    '1063': 'fas fa-cloud-sun-rain',// Patchy rain
+                    '1066': 'fas fa-snowflake',     // Patchy snow
+                    '1069': 'fas fa-cloud-meatball',// Sleet
+                    '1072': 'fas fa-cloud-rain',    // Freezing drizzle
+                    '1087': 'fas fa-bolt',          // Thundery outbreaks
+                    '1114': 'fas fa-wind',          // Blowing snow
+                    '1117': 'fas fa-wind',          // Blizzard
+                    '1135': 'fas fa-smog',          // Fog
+                    '1147': 'fas fa-smog',          // Freezing fog
+                    '1150': 'fas fa-cloud-rain',    // Patchy light drizzle
+                    '1153': 'fas fa-cloud-rain',    // Light drizzle
+                    '1168': 'fas fa-cloud-rain',    // Freezing drizzle
+                    '1171': 'fas fa-cloud-rain',    // Heavy freezing drizzle
+                    '1180': 'fas fa-cloud-sun-rain',// Patchy light rain
+                    '1183': 'fas fa-cloud-rain',    // Light rain
+                    '1186': 'fas fa-cloud-rain',    // Moderate rain
+                    '1189': 'fas fa-cloud-rain',    // Heavy rain
+                    '1192': 'fas fa-cloud-showers-heavy', // Heavy rain
+                    '1195': 'fas fa-cloud-showers-heavy', // Heavy rain
+                    '1198': 'fas fa-cloud-rain',    // Light freezing rain
+                    '1201': 'fas fa-cloud-rain',    // Moderate/heavy freezing rain
+                    '1204': 'fas fa-cloud-meatball',// Light sleet
+                    '1207': 'fas fa-cloud-meatball',// Moderate/heavy sleet
+                    '1210': 'fas fa-snowflake',     // Patchy light snow
+                    '1213': 'fas fa-snowflake',     // Light snow
+                    '1216': 'fas fa-snowflake',     // Patchy moderate snow
+                    '1219': 'fas fa-snowflake',     // Moderate snow
+                    '1222': 'fas fa-snowflake',     // Patchy heavy snow
+                    '1225': 'fas fa-snowflake',     // Heavy snow
+                    '1237': 'fas fa-cloud-meatball',// Ice pellets
+                    '1240': 'fas fa-cloud-sun-rain',// Light rain shower
+                    '1243': 'fas fa-cloud-showers-heavy', // Heavy rain shower
+                    '1246': 'fas fa-cloud-showers-heavy', // Torrential rain shower
+                    '1249': 'fas fa-cloud-meatball',// Light sleet showers
+                    '1252': 'fas fa-cloud-meatball',// Moderate/heavy sleet showers
+                    '1255': 'fas fa-snowflake',     // Light snow showers
+                    '1258': 'fas fa-snowflake',     // Moderate/heavy snow showers
+                    '1261': 'fas fa-cloud-meatball',// Light showers of ice pellets
+                    '1264': 'fas fa-cloud-meatball',// Moderate/heavy showers of ice pellets
+                    '1273': 'fas fa-bolt',          // Patchy light rain with thunder
+                    '1276': 'fas fa-bolt',          // Moderate/heavy rain with thunder
+                    '1279': 'fas fa-bolt',          // Patchy light snow with thunder
+                    '1282': 'fas fa-bolt'           // Moderate/heavy snow with thunder
+                };
+                
+                return iconMap[conditionCode] || 'fas fa-cloud';
+            }
+            
+            // Update UI with weather data
+            function updateWeatherUI(data) {
+                const cityName = document.querySelector('.city-name');
+                const date = document.querySelector('.date');
+                const temperature = document.querySelector('.temperature');
+                const weatherCondition = document.querySelector('.weather-condition span');
+                const weatherIcon = document.querySelector('.weather-icon');
+                const windValue = document.querySelector('.detail:nth-child(1) .detail-value');
+                const humidityValue = document.querySelector('.detail:nth-child(2) .detail-value');
+                const pressureValue = document.querySelector('.detail:nth-child(3) .detail-value');
+                const visibilityValue = document.querySelector('.detail:nth-child(4) .detail-value');
+                
+                cityName.textContent = data.location.name;
+                date.textContent = formatDate(new Date(data.location.localtime));
+                temperature.textContent = data.current.temp_c;
+                weatherCondition.textContent = data.current.condition.text;
+                
+                // Update weather icon
+                const iconClass = getWeatherIcon(String(data.current.condition.code));
+                weatherIcon.innerHTML = `<i class="${iconClass}" style="font-size: 100px;"></i>`;
+                
+                // Update weather details
+                windValue.textContent = `${data.current.wind_kph} km/h`;
+                humidityValue.textContent = `${data.current.humidity}%`;
+                pressureValue.textContent = `${data.current.pressure_mb} hPa`;
+                visibilityValue.textContent = `${data.current.vis_km} km`;
+            }
+            
+            // Fetch weather data from API
+            function fetchWeatherData(city) {
+                // Show loader
+                loader.style.display = 'block';
+                weatherInfo.style.opacity = '0.3';
+                errorMessage.style.display = 'none';
+                
+                const apiUrl = `http://api.weatherapi.com/v1/current.json?key=a68d5eed5809467e805135402253008&q=${city}&aqi=yes`;
+                
+                fetch(apiUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('City not found');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        updateWeatherUI(data);
+                        // Hide loader
+                        loader.style.display = 'none';
+                        weatherInfo.style.opacity = '1';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching weather data:', error);
+                        loader.style.display = 'none';
+                        weatherInfo.style.opacity = '1';
+                        errorMessage.style.display = 'block';
+                        errorMessage.textContent = error.message;
+                    });
+            }
+            
+            // Search button click event
+            searchBtn.addEventListener('click', function() {
+                const city = cityInput.value.trim();
+                if (city) {
+                    currentCity = city;
+                    fetchWeatherData(city);
+                }
+            });
+            
+            // Enter key press event in input field
+            cityInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const city = cityInput.value.trim();
+                    if (city) {
+                        currentCity = city;
+                        fetchWeatherData(city);
+                    }
+                }
+            });
+            
+            // Initialize with default city
+            fetchWeatherData(currentCity);
+        });
+    </script>
+</body>
+</html>
